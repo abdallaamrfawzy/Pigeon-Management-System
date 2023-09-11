@@ -79,33 +79,6 @@ let showBirds = `
                     </tbody>
                 </table></section>
 `;
-let birdFeeder = `
-  <div class="birdFeeder">
-    <div class="form">
-      <h1>Food information</h1>
-      <div class="inputs">
-        <label for="KgMillet">Write down the usual weight to buy "Millet"</label>
-        <input type="number" id="KgMillet"/>
-        <span class="error-KgMillet" style="color:red; display: none;">You Must Writ The usual weight to buy "Millet" </span>
-        <label for="KgBean">Write down the usual weight to buy "Bean"</label>
-        <input type="number" id="KgBean"/>
-        <label for="Date">Write down the usual feeding regimen</label>
-        <input type="number" id="Date"/>
-        <span class="error-date" style="color:red; display: none;">You Must Writ The usual feeding regimen</span>
-      </div>
-      <div class="radios">
-        <span class="error-Am-Pm" style="color:red; display: none;">Please select a time of day (Am or Pm).</span>
-        <input type="radio" name="date" id="pm" class="pm" />
-        <label for="pm">Pm</label>
-        <input type="radio" name="date" id="am" class="am" />
-        <label for="am">Am</label>
-      </div>
-      <div class="div-save">
-        <button class="save save-info-food">Save</button>
-      <div>
-    </div>
-  </div>
-`;
 let addOldDiv = `
 <div class="addDiv addOldYoung" >
 <div class="form">
@@ -380,10 +353,6 @@ function liFunction() {
         ScrollReveal().reveal(".start-btn", { origin: "left" });
         getStart();
         writTextAuto();
-      } else if (li.classList.contains("li-feeder")) {
-        appendEle.innerHTML = "";
-        appendEle.innerHTML = birdFeeder;
-        li.classList.add("active");
       } else if (li.classList.contains("li-profiles")) {
         appendEle.innerHTML = "";
         appendEle.innerHTML = BirdProfiles;
@@ -2552,13 +2521,13 @@ function BirdProfile() {
           textCalc.style.display = "none";
         }
         viewPartner();
-        imageProfile(birdStage, idValue);
+        imageProfile(birdStage, idValue, false);
         break;
       }
     }
   });
 }
-function imageProfile(birdStage, idValue) {
+function imageProfile(birdStage, idValue, partner) {
   const btnImg = document.querySelector(".btn-img");
   const uploadImg = document.querySelector(".upload-img");
   const img = document.querySelector(".show-img");
@@ -2613,12 +2582,30 @@ function imageProfile(birdStage, idValue) {
   function handleFileChange(event) {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        localStorage.setItem(`image${birdStage}${idValue}`, reader.result);
-        checkImageInLocalStorage();
-      };
-      reader.readAsDataURL(file);
+      if (partner === true) {
+        console.log(partner);
+        if (window.sessionStorage.getItem(`idBird${idValue}`)) {
+          let id = window.sessionStorage.getItem(`idBird${idValue}`);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            localStorage.setItem(`image${birdStage}${id}`, reader.result);
+            checkImageInLocalStorage();
+          };
+          reader.readAsDataURL(file);
+        }
+      } else {
+        console.log(partner);
+        if (partner === undefined) {
+          return;
+        } else {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            localStorage.setItem(`image${birdStage}${idValue}`, reader.result);
+            checkImageInLocalStorage();
+          };
+          reader.readAsDataURL(file);
+        }
+      }
     }
   }
 
@@ -2715,11 +2702,27 @@ function viewPartner() {
         let pCalc = document.querySelector(".text-calc");
         pCalc.style.display = "block";
         let dateNow = new Date();
+        window.sessionStorage.setItem(`idBird${showId}`, showId);
         calculateAge(showDate, dateNow, inputAge, `${showBirdStage}Info`);
-        imageProfile("bird", showId);
+        imageProfile("bird", showId, true);
         viewChildren(showId);
+        const img = document.querySelector(".show-img");
+        const menuImg = document.querySelector(".menu-img");
+        function handleImageClick(e) {
+          if (menuImg.style.display === "none") {
+            if (img.classList.contains("big-img")) {
+              return;
+            } else {
+              e.stopPropagation();
+              menuImg.style.display = "block";
+            }
+          } else {
+            menuImg.style.display = "none";
+          }
+        }
+        img.addEventListener("click", handleImageClick);
       }
-    }, 30);
+    }, 10);
   });
 }
 function viewChildren(id) {
@@ -2860,6 +2863,7 @@ function viewChildren(id) {
             divImg.style =
               "text-align:center;color:var(--colorText);border-radius: 50%;height: 50px;background-color: #5f5f5f; width: 50px;justify-content: center cursor: pointer;z-index: 999;";
           }
+          imageProfile("birdYoung", i);
         } else {
           let dateObjectJS = JSON.parse(
             window.localStorage.getItem(`bird${id}`)
@@ -2910,6 +2914,7 @@ function viewChildren(id) {
               divImg.style =
                 "text-align:center;color:var(--colorText);border-radius: 50%;height: 50px;background-color: #5f5f5f; width: 50px;justify-content: center cursor: pointer;z-index: 999;";
             }
+            imageProfile("birdYoung", i);
           } else if (i == localStorage.length) {
             found1 = false;
           }
@@ -2944,6 +2949,7 @@ function viewChildren(id) {
           inputBirdStage.value = birdStage;
           document.querySelector(`.Egg${i} .show-btn`).style =
             "position: relative; top: 60px;";
+          imageProfile("Egg", i);
         } else {
           let dateObjectJS = JSON.parse(
             window.localStorage.getItem(`bird${id}`)
@@ -2975,6 +2981,7 @@ function viewChildren(id) {
               divImg.style =
                 "text-align:center;color:var(--colorText);border-radius: 50%;height: 50px;background-color: #5f5f5f; width: 50px;justify-content: center cursor: pointer;z-index: 999;";
             }
+            imageProfile("Egg", i);
           } else if (i == localStorage.length) {
             found1 = false;
           }
@@ -3125,6 +3132,21 @@ function showBtnFunction() {
         labelId2.innerHTML = "Parent Id";
       }
       viewPartner();
+      const img = document.querySelector(".show-img");
+      const menuImg = document.querySelector(".menu-img");
+      function handleImageClick(e) {
+        if (menuImg.style.display === "none") {
+          if (img.classList.contains("big-img")) {
+            return;
+          } else {
+            e.stopPropagation();
+            menuImg.style.display = "block";
+          }
+        } else {
+          menuImg.style.display = "none";
+        }
+      }
+      img.addEventListener("click", handleImageClick);
       imageProfile(birdStage, idValue);
     });
   });

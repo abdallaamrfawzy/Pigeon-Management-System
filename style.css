@@ -52,6 +52,7 @@ header {
     text-align: center;
     display: flex;
     align-items: center;
+    margin-left: 20px;
 }
 
 .nav .nav-ul {
